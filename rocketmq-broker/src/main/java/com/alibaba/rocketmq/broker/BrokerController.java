@@ -87,12 +87,14 @@ public class BrokerController {
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
             "BrokerControllerScheduledThread"));
     private final SlaveSynchronize slaveSynchronize;
+    //发送线程队列
     private final BlockingQueue<Runnable> sendThreadPoolQueue;
     private final BlockingQueue<Runnable> pullThreadPoolQueue;
     private final FilterServerManager filterServerManager;
     private final BrokerStatsManager brokerStatsManager;
     private final List<SendMessageHook> sendMessageHookList = new ArrayList<SendMessageHook>();
     private final List<ConsumeMessageHook> consumeMessageHookList = new ArrayList<ConsumeMessageHook>();
+    //消息仓库
     private MessageStore messageStore;
     private RemotingServer remotingServer;
     private RemotingServer fastRemotingServer;
@@ -159,9 +161,11 @@ public class BrokerController {
         return pullThreadPoolQueue;
     }
 
+
+    //初始化
     public boolean initialize() throws CloneNotSupportedException {
         boolean result = true;
-
+        //加载top管理
         result = result && this.topicConfigManager.load();
 
         result = result && this.consumerOffsetManager.load();
@@ -169,6 +173,7 @@ public class BrokerController {
 
         if (result) {
             try {
+                //消息仓库
                 this.messageStore =
                         new DefaultMessageStore(this.messageStoreConfig, this.brokerStatsManager, this.messageArrivingListener,
                                 this.brokerConfig);

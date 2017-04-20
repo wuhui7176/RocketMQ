@@ -30,7 +30,10 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
+ * 延迟发送
  * @author shijia.wxr
+ * 快速失败
+ *
  */
 public class BrokerFastFailure {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BrokerLoggerName);
@@ -59,7 +62,6 @@ public class BrokerFastFailure {
                     if (null == runnable) {
                         break;
                     }
-
                     final RequestTask rt = castRunnable(runnable);
                     rt.returnResponse(RemotingSysResponseCode.SYSTEM_BUSY, String.format("[PCBUSY_CLEAN_QUEUE]broker busy, start flow control for a while, period in queue: %sms, size of queue: %d", System.currentTimeMillis() - rt.getCreateTimestamp(), this.brokerController.getSendThreadPoolQueue().size()));
                 } else {
@@ -80,7 +82,6 @@ public class BrokerFastFailure {
                     if (rt.isStopRun()) {
                         break;
                     }
-
                     final long behind = System.currentTimeMillis() - rt.getCreateTimestamp();
                     if (behind >= this.brokerController.getBrokerConfig().getWaitTimeMillsInSendQueue()) {
                         if (this.brokerController.getSendThreadPoolQueue().remove(runnable)) {

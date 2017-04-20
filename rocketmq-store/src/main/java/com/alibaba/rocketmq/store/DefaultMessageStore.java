@@ -138,7 +138,7 @@ public class DefaultMessageStore implements MessageStore {
 
     /**
 
-     *
+     *启动加载历史数据
      * @throws IOException
      */
     public boolean load() {
@@ -147,9 +147,6 @@ public class DefaultMessageStore implements MessageStore {
         try {
             boolean lastExitOK = !this.isTempFileExist();
             log.info("last shutdown {}", (lastExitOK ? "normally" : "abnormally"));
-
-
-
 
             if (null != scheduleMessageService) {
                 result = result && this.scheduleMessageService.load();

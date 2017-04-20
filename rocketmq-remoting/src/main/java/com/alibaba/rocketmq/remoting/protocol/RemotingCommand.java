@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author shijia.wxr
  */
 public class RemotingCommand {
+
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.RemotingLogName);
@@ -160,12 +161,15 @@ public class RemotingCommand {
         return createResponseCommand(code, remark, null);
     }
 
+
+    //解码成为实体类
     public static RemotingCommand decode(final byte[] array) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(array);
         return decode(byteBuffer);
     }
 
     public static RemotingCommand decode(final ByteBuffer byteBuffer) {
+
         int length = byteBuffer.limit();
         int oriHeaderLen = byteBuffer.getInt();
         int headerLength = getHeaderLength(oriHeaderLen);

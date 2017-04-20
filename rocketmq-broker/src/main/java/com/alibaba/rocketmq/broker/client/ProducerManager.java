@@ -39,6 +39,7 @@ public class ProducerManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BrokerLoggerName);
     private static final long LockTimeoutMillis = 3000;
     private static final long ChannelExpiredTimeout = 1000 * 120;
+    //重入锁
     private final Lock groupChannelLock = new ReentrantLock();
     private final HashMap<String /* group name */, HashMap<Channel, ClientChannelInfo>> groupChannelTable =
             new HashMap<String, HashMap<Channel, ClientChannelInfo>>();
@@ -68,25 +69,30 @@ public class ProducerManager {
 
     public void scanNotActiveChannel() {
         try {
+            //获得锁，最长不超过3秒
             if (this.groupChannelLock.tryLock(LockTimeoutMillis, TimeUnit.MILLISECONDS)) {
                 try {
+                    //迭代
                     for (final Map.Entry<String, HashMap<Channel, ClientChannelInfo>> entry : this.groupChannelTable
                             .entrySet()) {
+                        //生产者按组分
                         final String group = entry.getKey();
+                        //channel
                         final HashMap<Channel, ClientChannelInfo> chlMap = entry.getValue();
-
+                        //迭代
                         Iterator<Entry<Channel, ClientChannelInfo>> it = chlMap.entrySet().iterator();
                         while (it.hasNext()) {
                             Entry<Channel, ClientChannelInfo> item = it.next();
                             // final Integer id = item.getKey();
                             final ClientChannelInfo info = item.getValue();
-
+                            //超时就关闭
                             long diff = System.currentTimeMillis() - info.getLastUpdateTimestamp();
                             if (diff > ChannelExpiredTimeout) {
                                 it.remove();
                                 log.warn(
                                         "SCAN: remove expired channel[{}] from ProducerManager groupChannelTable, producer group name: {}",
                                         RemotingHelper.parseChannelRemoteAddr(info.getChannel()), group);
+                                //关闭通道
                                 RemotingUtil.closeChannel(info.getChannel());
                             }
                         }

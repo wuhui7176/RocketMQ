@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 package com.alibaba.rocketmq.broker.mqtrace;
-
+//消费消息的钩子
 public interface ConsumeMessageHook {
     String hookName();
 

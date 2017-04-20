@@ -30,12 +30,14 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
+ * 管理 broker 和 prodcuer 和 consume 连接
  * @author shijia.wxr
  */
 public class ClientHousekeepingService implements ChannelEventListener {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BrokerLoggerName);
     private final BrokerController brokerController;
 
+    //单线程池,线程名称是ClientHousekeepingScheduledThread
     private ScheduledExecutorService scheduledExecutorService = Executors
             .newSingleThreadScheduledExecutor(new ThreadFactoryImpl("ClientHousekeepingScheduledThread"));
 
@@ -60,7 +62,9 @@ public class ClientHousekeepingService implements ChannelEventListener {
     }
 
     private void scanExceptionChannel() {
+        //扫描生产者不活跃的通道
         this.brokerController.getProducerManager().scanNotActiveChannel();
+        //扫描消费者不活跃的通道
         this.brokerController.getConsumerManager().scanNotActiveChannel();
         this.brokerController.getFilterServerManager().scanNotActiveChannel();
     }
@@ -74,7 +78,7 @@ public class ClientHousekeepingService implements ChannelEventListener {
 
     }
 
-
+    //通道关闭
     @Override
     public void onChannelClose(String remoteAddr, Channel channel) {
         this.brokerController.getProducerManager().doChannelCloseEvent(remoteAddr, channel);
